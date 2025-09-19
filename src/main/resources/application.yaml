@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    active: dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+message: "Hello World!"
+
+logging:
+  level:
+    com.thresholdsign: DEBUG
+    root: INFO
