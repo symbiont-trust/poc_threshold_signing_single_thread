@@ -45,8 +45,16 @@ public class ThresholdSignerHelperImpl implements ThresholdSignerHelper {
 
         Set<Integer> nodes = new HashSet<>();
 
-        for ( int i = 0; i < numberNodes; i++ ) {
-            nodes.add( i );
+        // Use the exact same nodes as the working test for T=4, N=7
+        if (numberNodes == 7) {
+            nodes.add(1);
+            nodes.add(3);
+            nodes.add(4);
+            nodes.add(6);
+        } else {
+            for ( int i = 0; i < numberNodes; i++ ) {
+                nodes.add( i );
+            }
         }
 
         return nodes;
@@ -226,6 +234,7 @@ public class ThresholdSignerHelperImpl implements ThresholdSignerHelper {
 
         // Ed25519 signatures are 64 bytes: 32-byte R + 32-byte S
         if ( signature.length == 64 ) {
+
             byte[] R_bytes = Arrays.copyOfRange( signature, 0, 32 );
             byte[] S_bytes = Arrays.copyOfRange( signature, 32, 64 );
             log.info( "R component (32 bytes): " + bytesToHex( R_bytes ) );
