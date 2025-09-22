@@ -35,7 +35,7 @@ public class SerializerHelperImpl implements SerializerHelper {
                 .registerTypeAdapter( EdwardsPoint.class, new EdwardsPointTypeAdapter() )
                 .create();
 
-        log.info( "Initialized GesonBuilder" );
+        log.info( "Initialized Gson" );
     }
 
     @Override

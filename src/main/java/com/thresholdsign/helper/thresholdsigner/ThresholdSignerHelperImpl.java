@@ -49,7 +49,7 @@ public class ThresholdSignerHelperImpl implements ThresholdSignerHelper {
             nodes.add( i );
         }
 
-        return null;
+        return nodes;
     }
 
 

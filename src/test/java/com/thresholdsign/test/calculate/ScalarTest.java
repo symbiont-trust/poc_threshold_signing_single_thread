@@ -10,14 +10,19 @@
 */
 package com.thresholdsign.test.calculate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class AdditionTest {
+import com.weavechain.curve25519.Scalar;
+
+public class ScalarTest {
 
     @Test
-    public void testAddition() {
-        assertEquals(4, 2 + 2);
+    public void testScalarSerialization() {
+
+        Scalar originalScalar = Scalar.ONE;
+        byte[] bytes = originalScalar.toByteArray();
+        Scalar reconstructedScalar = Scalar.fromCanonicalBytes( bytes );
+        Assertions.assertEquals( 1, originalScalar.ctEquals( reconstructedScalar ) );
     }
 }

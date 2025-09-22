@@ -52,6 +52,7 @@ public class SimulatorImpl implements Simulator {
     // the nodes
     private Map<Integer, NodeParams> nodeState_NodeParamsByNodeId = new HashMap<>();
 
+
     @Override
     public void start() throws Exception {
 
