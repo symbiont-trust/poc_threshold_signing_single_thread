@@ -65,3 +65,9 @@ pids
 # Temporary files
 *.tmp
 *.temp
+
+# Claude Code - exclude everything except commands
+.claude/
+!.claude/commands/
+
+.factorypath

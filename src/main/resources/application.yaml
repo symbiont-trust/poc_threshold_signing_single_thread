@@ -3,14 +3,19 @@ spring:
     active: dev
 
 ---
+
 spring:
   config:
     activate:
       on-profile: dev
-
-message: "Hello World!"
-
+      
 logging:
   level:
     com.thresholdsign: DEBUG
     root: INFO
+
+startup:
+    message: "About to run the Threshold Signing Simulation"
+    T: 2
+    N: 3
+    stringToSign: "Threshold Signing Rocks!"

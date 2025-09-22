@@ -8,16 +8,14 @@
     Author : JD
     ================================================================================================
 */
-package com.thresholdsign.test.calculate;
+package com.thresholdsign.simulator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Test;
+/**
+ * @author John Dickerson - 19 Sep 2025
+ */
+public interface Simulator {
 
-public class AdditionTest {
+    void start() throws Exception;
 
-    @Test
-    public void testAddition() {
-        assertEquals(4, 2 + 2);
-    }
 }

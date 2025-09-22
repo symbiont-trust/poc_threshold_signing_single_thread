@@ -63,6 +63,13 @@
             <artifactId>curve25519-elisabeth</artifactId>
             <version>0.1.5</version>
         </dependency>
+        
+        <!-- JSON serialization -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
