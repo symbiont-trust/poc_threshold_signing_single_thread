@@ -11,10 +11,13 @@
 package com.thresholdsign.simulator;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -48,6 +51,9 @@ public class SimulatorImpl implements Simulator {
     @Value( "${startup.stringToSign}" )
     private String toSign;
 
+    @Value( "${startup.nodes}" )
+    private String nodesConfig;
+
     // This holds Node state.  As we are not making network calls we still emulate state on 
     // the nodes
     private Map<Integer, NodeParams> nodeState_NodeParamsByNodeId = new HashMap<>();
@@ -58,7 +64,15 @@ public class SimulatorImpl implements Simulator {
 
         // The code in this start is carried out by the Coordinator
 
-        Set<Integer> nodes = thresholdSignerHelper.getNodes( N );
+        // Parse comma-separated nodes configuration
+        Set<Integer> nodes = parseNodes(nodesConfig);
+
+        // Validate that we have exactly T nodes
+        if (nodes.size() != T) {
+            throw new IllegalArgumentException(
+                "Number of configured nodes (" + nodes.size() +
+                ") must equal threshold T (" + T + ")");
+        }
         ThresholdSigEd25519 tsig = new ThresholdSigEd25519( T, N );
 
         // This has the public key and private key shares in it
@@ -98,5 +112,12 @@ public class SimulatorImpl implements Simulator {
         log.info( "Final Signature is valid = " + check );
 
         thresholdSignerHelper.displaySignature( finalSignature );
+    }
+
+    private Set<Integer> parseNodes(String nodesConfig) {
+        return Arrays.stream(nodesConfig.split(","))
+                .map(String::trim)
+                .map(Integer::parseInt)
+                .collect(Collectors.toSet());
     }
 }

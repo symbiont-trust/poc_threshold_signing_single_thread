@@ -17,7 +17,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.thresholdsign.helper.serializer.NodeParams;
@@ -39,29 +41,17 @@ import lombok.extern.slf4j.Slf4j;
 public class ThresholdSignerHelperImpl implements ThresholdSignerHelper {
 
     private final SerializerHelper serializerHelper;
+
+    @Value( "${startup.nodes}" )
+    private String nodesConfig;
     
     @Override
     public Set<Integer> getNodes( Integer numberNodes ) {
-
-        Set<Integer> nodes = new HashSet<>();
-
-        // Use the exact same nodes as the working test for T=4, N=7
-        if (numberNodes == 7) {
-            nodes.add(1);
-            nodes.add(3);
-            nodes.add(4);
-            nodes.add(6);
-        } else if (numberNodes == 3) {
-            // For T=2, N=3, use exactly T=2 nodes, not all 3
-            nodes.add(1);
-            nodes.add(2);
-        } else {
-            for ( int i = 0; i < numberNodes; i++ ) {
-                nodes.add( i );
-            }
-        }
-
-        return nodes;
+        // Parse nodes from application.yaml configuration
+        return Arrays.stream(nodesConfig.split(","))
+                .map(String::trim)
+                .map(Integer::parseInt)
+                .collect(Collectors.toSet());
     }
 
 

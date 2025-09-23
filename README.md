@@ -2,14 +2,53 @@
 
 ## Overview
 
-This project is a POC showing how threshold signing works. It will include methods that serialize and deserialize arguments. There will be no network in between the serializing and deserializing and it will run in a single thread.
+This project is a POC demonstrating threshold signature implementation using Ed25519 cryptography. It simulates a distributed threshold signing system where T-of-N parties collaborate to create a valid signature, but runs in a single thread for simplicity.
 
-However as there are serialization and deserialization methods it will not be hard to later use this POC as the starting point for another POC which does use networks.
+The implementation includes serialization and deserialization methods to simulate network communication, making it easy to extend for distributed network-based scenarios.
+
+## Key Features
+
+- **Configurable threshold parameters**: T (threshold) and N (total parties)
+- **Flexible node selection**: Specify which nodes participate via configuration
+- **Complete threshold signing workflow**: Parameter generation, partial signatures, and final signature combination
+- **Signature validation**: Cryptographic verification of the final threshold signature
+- **Network simulation**: Serialization/deserialization to emulate distributed communication
 
 ## Requirements
 
 - Java 20
 - Maven 3.6+
+
+## Configuration
+
+The threshold signing parameters are configured in `src/main/resources/application.yaml`:
+
+```yaml
+startup:
+    message: "About to run the Threshold Signing Simulation"
+    T: 4                    # Threshold: minimum signatures needed
+    N: 7                    # Total number of parties
+    nodes: "1,3,4,6"       # Comma-separated list of participating nodes
+    stringToSign: "test"    # Message to be signed
+```
+
+### Configuration Examples
+
+**2-of-3 Threshold:**
+```yaml
+T: 2
+N: 3
+nodes: "1,2"
+```
+
+**3-of-5 Threshold:**
+```yaml
+T: 3
+N: 5
+nodes: "0,2,4"
+```
+
+**Important**: The number of nodes specified must equal the threshold T value.
 
 ## Running the Application
 
@@ -18,20 +57,44 @@ However as there are serialization and deserialization methods it will not be ha
 To run the Spring Boot application:
 
 ```bash
-./scripts/start.sh
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-20.jdk/Contents/Home
+mvn spring-boot:run
 ```
 
-This will start the application and you should see "Hello World!" logged to the console.
+This will execute the threshold signing simulation and display the signature verification result.
 
 ### Run Tests
 
 To run the JUnit tests:
 
 ```bash
-./scripts/test.sh
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-20.jdk/Contents/Home
+mvn test
 ```
 
-This will execute the AdditionTest to verify that 2 + 2 = 4.
+This will execute:
+- **ScalarTest**: Tests cryptographic scalar serialization
+- **SimpleThresholdTest**: Tests basic threshold signature workflow
+
+## Sample Output
+
+When running successfully, you should see output similar to:
+
+```
+INFO c.thresholdsign.start.Start : About to run the Threshold Signing Simulation
+INFO c.t.h.t.ThresholdSignerHelperImpl : Sending serialzableParams to node, 1
+INFO c.t.h.t.ThresholdSignerHelperImpl : Node with nodeId, 1, Received seriaized NodeParams
+...
+INFO c.thresholdsign.simulator.SimulatorImpl : Final Signature is valid = true
+
+=== Signature Details ===
+Signature length: 64 bytes
+Signature (hex): 4a8adaa3b52cfe1ed3ae202c3d2049d9c142214310364560a649e8c0f9f6cde4b5c2372bcac061d52b8bba8e0890c828be35c5e19eeddac1faacdea3ca08e90b
+Signature (base64): Sorao7Us/h7TriAsPSBJ2cFCIUMQNkVgpknowPn2zeS1wjcrysBh1SuLuo4IkMgovjXF4Z7t2sH6rN6jygjpCw==
+R component (32 bytes): 4a8adaa3b52cfe1ed3ae202c3d2049d9c142214310364560a649e8c0f9f6cde4
+S component (32 bytes): b5c2372bcac061d52b8bba8e0890c828be35c5e19eeddac1faacdea3ca08e90b
+========================
+```
 
 ## IDE Setup
 
@@ -79,6 +142,35 @@ This project uses:
   - threshold-sig 1.3
   - curve25519-elisabeth 0.1.5
 
+## How Threshold Signatures Work
+
+This implementation demonstrates the complete threshold signature workflow:
+
+1. **Parameter Generation**: A coordinator generates threshold parameters including:
+   - Public key (shared by all)
+   - Private key shares (one per node)
+   - Mathematical parameters for the scheme
+
+2. **Round 1 - Commitment Phase**: Each participating node:
+   - Receives its private share and the message to sign
+   - Computes a commitment value (Ri)
+   - Sends the commitment back to the coordinator
+
+3. **Challenge Computation**: The coordinator:
+   - Collects all commitments from T nodes
+   - Computes the combined commitment (R)
+   - Generates the challenge value (k)
+
+4. **Round 2 - Response Phase**: Each node:
+   - Receives the challenge value
+   - Computes its partial signature using its private share
+   - Sends the partial signature to the coordinator
+
+5. **Final Signature**: The coordinator:
+   - Combines all T partial signatures
+   - Produces the final threshold signature
+   - Verifies the signature is valid
+
 ## Project Structure
 
 ```
@@ -86,13 +178,34 @@ src/
 ├── main/
 │   ├── java/
 │   │   └── com/thresholdsign/
-│   │       ├── Application.java
-│   │       └── start/
-│   │           └── Start.java
+│   │       ├── Application.java                    # Spring Boot main class
+│   │       ├── start/
+│   │       │   └── Start.java                     # Application startup listener
+│   │       ├── simulator/
+│   │       │   ├── Simulator.java                 # Simulator interface
+│   │       │   └── SimulatorImpl.java             # Main threshold signing coordinator
+│   │       └── helper/
+│   │           ├── serializer/
+│   │           │   ├── NodeParams.java            # Node parameter container
+│   │           │   ├── SerializerHelper.java      # Serialization interface
+│   │           │   └── SerializerHelperImpl.java  # JSON serialization implementation
+│   │           └── thresholdsigner/
+│   │               ├── ThresholdSignerHelper.java     # Threshold signer interface
+│   │               └── ThresholdSignerHelperImpl.java # Threshold signer implementation
 │   └── resources/
-│       └── application.yaml
+│       └── application.yaml                       # Configuration file
 └── test/
     └── java/
-        └── com/thresholdsign/test/calculate/
-            └── AdditionTest.java
+        └── com/thresholdsign/test/
+            ├── calculate/
+            │   └── ScalarTest.java                # Cryptographic tests
+            └── SimpleThresholdTest.java          # Integration test
 ```
+
+## Security Considerations
+
+- **Node Authentication**: In production, implement proper node authentication
+- **Secure Communication**: Use TLS/SSL for network communication
+- **Key Management**: Secure storage and distribution of private shares
+- **Replay Protection**: Implement nonce/timestamp mechanisms
+- **Audit Logging**: Track all signing operations for security monitoring
