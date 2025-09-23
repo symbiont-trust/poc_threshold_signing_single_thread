@@ -51,6 +51,10 @@ public class ThresholdSignerHelperImpl implements ThresholdSignerHelper {
             nodes.add(3);
             nodes.add(4);
             nodes.add(6);
+        } else if (numberNodes == 3) {
+            // For T=2, N=3, use exactly T=2 nodes, not all 3
+            nodes.add(1);
+            nodes.add(2);
         } else {
             for ( int i = 0; i < numberNodes; i++ ) {
                 nodes.add( i );

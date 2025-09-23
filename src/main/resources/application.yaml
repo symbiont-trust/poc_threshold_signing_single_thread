@@ -16,6 +16,6 @@ logging:
 
 startup:
     message: "About to run the Threshold Signing Simulation"
-    T: 4
-    N: 7
+    T: 2
+    N: 3
     stringToSign: "test"
